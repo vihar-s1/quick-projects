@@ -2,6 +2,7 @@ from bs4 import BeautifulSoup
 import requests, re
 from os import path, mkdir
 
+__LOGFILE = 'logFile.txt'
 
 def fetchImages(url: str) -> list[str]:
     r = requests.get(url)
@@ -45,7 +46,7 @@ def extractImageName(image_url:str) -> str | None:
 def downloadImages(images: list[str]) -> None:
     print(f"attempting to download {len(images)} images...\n")
     
-    logFile = open('logFile.txt', 'w')
+    logFile = open(__LOGFILE, 'w')
     
     for image in images:
         print(f"trying: {image}")
