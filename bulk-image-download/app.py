@@ -1,9 +1,17 @@
 from bs4 import BeautifulSoup
 import requests, re
 from os import path, mkdir
+import logging
 
-__LOGFILE = 'logFile.txt'
 __VISITED_URLS = set()
+
+logger = logging.getLogger()
+logger.setLevel(logging.DEBUG)
+
+logHandler = logging.FileHandler('bulk-image-download.log')
+logHandler.setFormatter( logging.Formatter('%(asctime)s : [%(levelname)s] - %(message)s\n') )
+
+logger.addHandler(logHandler)
 
 def extractImageName(image_url:str) -> str | None:
     # image = image.replace('%20', '_')  # replace the htmlparsed blank space with underscore
@@ -32,11 +40,25 @@ def downloadImages(url: str, recursiveDownload=False) -> None:
     
     # mark the url as visited for performing web scrapping operation
     __VISITED_URLS.add(url) 
-    
-    r = requests.get(url)
-    r.raise_for_status()
-    
-    logFile = open(__LOGFILE, 'a')
+    try: 
+        r = requests.get(url)
+        r.raise_for_status() # raises exception if return code is not 200
+        logger.info(f'Successfuly retrieved {url}')
+        
+    except requests.exceptions.SSLError as e:
+        # in case a sites SSL verification fails for some reason
+        logger.error(f'SSL Error retrieving {url}: {e}')
+        verify = input("Retry by ignoring SSL verification (y/n)?: ")
+        if verify.lower() == 'y':
+            r = requests.get(url, verify=False)
+            logger.info(f'Succesfully retrieved {url} with SSL verification ignored')
+        else:
+            return
+    except requests.exceptions.RequestException as e:
+        # in case that the request did not return with success code 200 or something else happened
+        logger.error(f'Error retrieviing {url}: {e}')
+        return
+        
     soup = BeautifulSoup(r.content, "html.parser")
     imgs = soup.find_all('img')
     
@@ -54,6 +76,7 @@ def downloadImages(url: str, recursiveDownload=False) -> None:
             # image was inside an anchor tag so most likely was thumbnail.
             # better to select the link in the anchor tag. if the href field is not found,
             # the link in kept untouched
+            print(parent.get('href'), imageURL)
             imageURL = parent.get('href', imageURL)
         
         if not imageURL: continue # empty url
@@ -62,14 +85,19 @@ def downloadImages(url: str, recursiveDownload=False) -> None:
             image_data = requests.get(imageURL) # getting the image data
             image_name = extractImageName(imageURL) # extracting image name from the url
             
+            print(image_name, imageURL)
+            image_data.raise_for_status()
+            
+            if not image_name: # empty image name so not a valid image url
+                continue
+            
             with open("images/" + image_name, 'wb') as imageFile:
                 imageFile.write(image_data.content)
-                imageFile.close()
-                logFile.write(f"[info] : Downloading Successful for image at url:\n{imageURL}\n\n")
-        except:
-            logFile.write(f"[error] : Failed to download the image at url:\n{imageURL}\n\n")
+                
+            logger.info(f'Successfuly retrieved image from {imageURL}')
             
-    logFile.close()
+        except requests.exceptions.RequestException as e:
+            logger.error(f"Error retrieving image from {imageURL}: {e}")
 
     if recursiveDownload:
         # recursively scrapping all webpages to download the images present on them
@@ -82,7 +110,7 @@ def downloadImages(url: str, recursiveDownload=False) -> None:
     
 
 def __main__():
-    url = "<website-url>"
+    url = "http://ganeshdhonitalkies.blogspot.com/2015/09/kriti-sanon-latest-pics.html"
     downloadImages(url)
     
 
