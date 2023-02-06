@@ -1,0 +1,5 @@
+# avoid uploading the downloaded imags
+bulk-image-download/images/
+
+# avoid uploading any log files
+bulk-image-download/*.log
