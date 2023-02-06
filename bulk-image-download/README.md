@@ -26,4 +26,5 @@
     <li> Using <i>get</i> function call from <i>requests</i> library, the function downloads the image data.
     <li> Image name is extracted using the <i><u>extractImageName</u></i> function.
     <li> It stores the image with the same name inside <b> images </b> directory and also shows log message regarding wether a downloading is successful with respect an image or not and stores it inside <b>logFile.txt</b>.
+    <li> The function has an additional parameter named <b>recursiveDownload</b> which tells the script whether to recursively download all images found in other urls present on the webpage  or simply stop after downloading images on the current page.
 </ul>
