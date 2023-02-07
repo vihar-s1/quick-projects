@@ -14,16 +14,14 @@ logHandler.setFormatter( logging.Formatter('%(asctime)s : [%(levelname)s] - %(me
 logger.addHandler(logHandler)
 
 def extractImageName(image_url:str) -> str | None:
-    # image = image.replace('%20', '_')  # replace the htmlparsed blank space with underscore
-    matchobj = re.findall(r'/([^/]*?)\.(svg|png|jpg|gif|jpeg|webp)', image_url) # extracting image name and extension to save the image
+    imageName = image_url.split('/')[-1]
     
-    if not matchobj: # no image found
-        return None
+    name_ext = imageName.rsplit('.',1)
     
-    # extracting image name and image extension to return the image name
-    fileName = f"{matchobj[0][0]}.{matchobj[0][1]}"
+    if name_ext[-1].lower() in ('png', 'jpg', 'jpeg', 'bmp', 'gif'):
+        return '.'.join(name_ext)
     
-    return fileName.replace("%20", " ")
+        
 
 
 def downloadImages(url: str, recursiveDownload=False) -> None:
@@ -37,6 +35,8 @@ def downloadImages(url: str, recursiveDownload=False) -> None:
     if url in __VISITED_URLS:
         # url already visited during a recursive call so ignore the url
         return
+    
+    print("Scrapping following url:",url)
     
     # mark the url as visited for performing web scrapping operation
     __VISITED_URLS.add(url) 
@@ -62,10 +62,14 @@ def downloadImages(url: str, recursiveDownload=False) -> None:
     soup = BeautifulSoup(r.content, "html.parser")
     imgs = soup.find_all('img')
     
+    # extracting the basepath for the images and the webpage
+    # used in-case the extracted url has path relative to base_url folder
+    base_url = re.match(r"^(.*/)(.*\.html)?", url).groups()[0]
+    
     if not path.exists('images/'):
         mkdir("images/")
     
-    print(f"found {len(imgs)} links")
+    print(f"found {len(imgs)} image-links")
     for img in imgs:
         # first checks data-src to see whether lazy-load was used or not.
         # else checks the src tag. If none are found, it returns ''
@@ -76,16 +80,25 @@ def downloadImages(url: str, recursiveDownload=False) -> None:
             # image was inside an anchor tag so most likely was thumbnail.
             # better to select the link in the anchor tag. if the href field is not found,
             # the link in kept untouched
-            print(parent.get('href'), imageURL)
             imageURL = parent.get('href', imageURL)
         
         if not imageURL: continue # empty url
         
+        # formulating complete url for the image if it is given with reference to webpage folder on server
+        
+        if imageURL[:4] != 'http': 
+            imageURL = path.join(base_url, imageURL)
+        
+        # if protocol still not specified even after joining the url, then we explicitly specify the protocol
+        # because with protocol specification, the image cannot be retrieved.
+        if imageURL[:4] != 'http': 
+            imageURL = 'https:' + imageURL
+            
+            
         try:
             image_data = requests.get(imageURL) # getting the image data
             image_name = extractImageName(imageURL) # extracting image name from the url
             
-            print(image_name, imageURL)
             image_data.raise_for_status()
             
             if not image_name: # empty image name so not a valid image url
@@ -103,9 +116,14 @@ def downloadImages(url: str, recursiveDownload=False) -> None:
         # recursively scrapping all webpages to download the images present on them
         links = soup.find_all('a')
         
+        print(f"recursing for {len(links)} links")
         for link in links:
             link_url = link.get('href')
             if link_url:
+                if link_url[0:4] != "http":
+                    link_url = path.join(base_url, link_url)
+                if link_url[0:4] != "http":
+                    link_url = "https:" + link_url 
                 downloadImages(link_url)
     
 
