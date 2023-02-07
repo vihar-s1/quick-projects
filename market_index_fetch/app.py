@@ -2,8 +2,13 @@
 
 import pandas as pd
 # Data Source
-import yfinance as yf
-from forex_python.converter import CurrencyRates, CurrencyCodes
+from nsetools import Nse
+from forex_python.converter import CurrencyRates, CurrencyCodes, RatesNotAvailableError
+
+
+def csv_stock_codes():
+    '''Generates a csv file comprising of all the stock codes and corresponding stock name.'''
+    pd.Series(Nse().get_stock_codes()).to_csv('stock_codes.csv')
 
 def getCurrencyRate(currencies: list[str]): 
     '''Obtaining the currency rates for conversion in INR from each currency in \'currencies\''''
@@ -17,27 +22,46 @@ def getCurrencyRate(currencies: list[str]):
     return rates
 
 
-def getCurrentIndexValue(tickers: list[str]) -> pd.DataFrame:
-    '''Fetches 1hr prior or the closing index values of the tickers given along with the volume of trade of that ticker/share'''
-    data = yf.download(tickers=tickers, period='1hr')
+def getStockQuote(tickers: list[str]) -> pd.DataFrame:
+    '''
+    Fetches symbol, company mame, day-High,  day-Low, base price, change, 
+    percentage change, total Traded Volume, closing price, and last price for the given ticker
+    in India's National Stock Market (NSE)
+    '''
+    nse = Nse()
+    keys = ['symbol', 'companyName', 'dayHigh', 'dayLow','basePrice', 'change', 'pChange', 'totalTradedVolume', 'closePrice', 'lastPrice']
     
-    # to convert incoming rates in USD to INR
-    usd_to_inr = CurrencyRates().get_rate('USD', 'INR')
+    quotes = {}
     
-    # data --> pandas dictionary --> keys: Open, High, Low, Close, Adj Close, Volume
-    
-    for entry in data:
-        data[entry] *= usd_to_inr
-             
-    data.to_html('./index.html') # dumps data in a table in index.html
-    return data['Close'], data['Volume']  # only return closing value and the volume of the shares
+    if type(tickers) is str:
+        quote = nse.get_quote(tickers)
+        req_data = {}
+        for key in keys:
+            req_data[key] = quote[key]
+        quotes[tickers] = req_data
+    else:
+        for ticker in tickers:
+            # get_index_quote
+            quote = nse.get_quote(ticker)
+            
+            if quote is None:
+                quotes[ticker] = None
+                continue
+            
+            req_data = {}
+            for key in keys:
+                req_data[key] = quote[key]
+                
+            quotes[ticker] = req_data
+            
+    return pd.DataFrame(quotes)  
 
 
 if __name__ == "__main__":
-    print(getCurrencyRate(['GBP','EUR','USD']))
-    closing_data, volume_data = getCurrentIndexValue(['AMZN', 'UBER', 'GOOGL'])
+    try:
+        print(getCurrencyRate(['GBP','EUR','USD']))
+    except RatesNotAvailableError as e:
+        print("RatesNotAvailableError Occured:", e)
     
-    print(closing_data.to_json(), "\n", volume_data.to_json())
-    
-    # print(data['Open']['NFTY']['Rate'], type(data['Open']['NFTY']))
-    
+    quotes = getStockQuote(['INFY', 'ADANIPOWER'])
+    print(quotes)

@@ -110,7 +110,7 @@ def downloadImages(url: str, recursiveDownload=False) -> None:
     
 
 def __main__():
-    url = "http://ganeshdhonitalkies.blogspot.com/2015/09/kriti-sanon-latest-pics.html"
+    url = "<paste url here>"
     downloadImages(url)
     
 

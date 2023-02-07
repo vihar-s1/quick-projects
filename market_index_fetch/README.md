@@ -2,9 +2,9 @@
 
 ## <u>Modules used</u>
 
-### yfinance
+### nsetools
 <ul>
-    <li> The module uses yahoo finance API to provide the functions to fetch the desired share's market price at a given time instance. 
+    <li> The module implements various functionalities for India's National Stock Exchange (NSE)
 </ul>
 
 ### forex_python
@@ -16,11 +16,11 @@
 
 ## <u>Functions Implemented</u>
 
-### getCurrencyIndexValue(tickers)
+### getCurrentIndexValue(tickers)
 <ul>
-    <li>The <i>yfinance</i> module is used to implement <b> getCurrentIndexValue(tickers) </b> function where <u>tickers</u> is a list of tickers of the share whose price is to found. 
-    <li>The fetched values are returned as <i>pandas Dataframe</i> object which dumped into index.html file.
-    The function also converts the fetched prices from USD to INR along the way using <i>forex_python</i> module.
+    <li>The <i>nsetools</i> module is used to implement <b> getCurrentIndexValue(tickers) </b> function where <u>tickers</u> is a list of tickers of the share whose price is to found. 
+    <li>The fetched values are returned as <i>pandas Dataframe</i> object.
+    The function fetches prices in INR as the stocks queried belong Indian Stock Market.
 </ul>
 
 ### getCurrencyRate(currencies):
