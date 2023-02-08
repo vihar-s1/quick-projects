@@ -3,6 +3,8 @@ import requests, re
 from os import path, mkdir
 import logging
 
+from pprint import pprint
+
 __VISITED_URLS = set()
 
 logger = logging.getLogger()
@@ -24,7 +26,7 @@ def extractImageName(image_url:str) -> str | None:
         
 
 
-def downloadImages(url: str, recursiveDownload=False) -> None:
+def downloadImages(url: str, recursiveDownload=False, debugStatements=False) -> None:
     '''
     - Downloads all the images found on the given url 'url'. 
     - After that, it goes on to download all the images on the links present on the anchor tags in an recursive manner
@@ -36,8 +38,9 @@ def downloadImages(url: str, recursiveDownload=False) -> None:
         # url already visited during a recursive call so ignore the url
         return
     
-    print("Scrapping following url:",url)
-    
+    if debugStatements:
+        print("Scrapping following url:",url)
+        
     # mark the url as visited for performing web scrapping operation
     __VISITED_URLS.add(url) 
     try: 
@@ -66,10 +69,18 @@ def downloadImages(url: str, recursiveDownload=False) -> None:
     # used in-case the extracted url has path relative to base_url folder
     base_url = re.match(r"^(.*/)(.*\.html)?", url).groups()[0]
     
+    # Ignore base URL because it will be like going back to parent while scrapping resulting in an un-necessary increase in URLs scrapped
+    if base_url[-1] == '/':
+        __VISITED_URLS.add(base_url[:-1])
+    else:
+        __VISITED_URLS.add(base_url)
+    
     if not path.exists('images/'):
         mkdir("images/")
     
-    print(f"found {len(imgs)} image-links")
+    if debugStatements:
+        print(f"found {len(imgs)} image-links")
+        
     for img in imgs:
         # first checks data-src to see whether lazy-load was used or not.
         # else checks the src tag. If none are found, it returns ''
@@ -116,20 +127,26 @@ def downloadImages(url: str, recursiveDownload=False) -> None:
         # recursively scrapping all webpages to download the images present on them
         links = soup.find_all('a')
         
-        print(f"recursing for {len(links)} links")
+        if debugStatements:
+            print(f"recursing for {len(links)} links")
         for link in links:
             link_url = link.get('href')
             if link_url:
                 if link_url[0:4] != "http":
                     link_url = path.join(base_url, link_url)
                 if link_url[0:4] != "http":
-                    link_url = "https:" + link_url 
-                downloadImages(link_url)
+                    link_url = "https:" + link_url
+                
+                # passing the recursive parameters recursively
+                # recursiveDownloads is not passed to allow only a single level of recursive download
+                # In case the image anchor tags contain a link to web-page which in turn actually holds the actual image-link.
+                downloadImages(link_url, debugStatements=debugStatements)
     
 
 def __main__():
     url = "<paste url here>"
-    downloadImages(url)
+    downloadImages(url, True, True)
+    print(f"total {len(__VISITED_URLS)} urls visited while scrapping {url}.")
     
 
 if __name__ == "__main__":
