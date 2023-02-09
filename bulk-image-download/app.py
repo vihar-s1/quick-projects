@@ -1,11 +1,10 @@
 from bs4 import BeautifulSoup
-import requests, re
-from os import path, mkdir
-import logging
+import requests, logging, urllib.parse
+from os import path, mkdir, system
 
-from pprint import pprint
 
 __VISITED_URLS = set()
+__RECURSE = True # flag to ensure single level recursion
 
 logger = logging.getLogger()
 logger.setLevel(logging.DEBUG)
@@ -14,6 +13,8 @@ logHandler = logging.FileHandler('bulk-image-download.log')
 logHandler.setFormatter( logging.Formatter('%(asctime)s : [%(levelname)s] - %(message)s\n') )
 
 logger.addHandler(logHandler)
+
+
 
 def extractImageName(image_url:str) -> str | None:
     imageName = image_url.split('/')[-1]
@@ -25,21 +26,20 @@ def extractImageName(image_url:str) -> str | None:
     
         
 
-
-def downloadImages(url: str, recursiveDownload=False, debugStatements=False) -> None:
+def downloadImages(url: str, debugStatements=False) -> None:
     '''
-    - Downloads all the images found on the given url 'url'. 
-    - After that, it goes on to download all the images on the links present on the anchor tags in an recursive manner
-    if recursiveDownload is True.
+    - Downloads all the images found on the given url 'url'.
+    - prints minimal debug statements if debugStatements = true
     - returns nothing.
     - generates a log of the all the success and errors occuring while downloading
     '''
+    global __RECURSE
     if url in __VISITED_URLS:
         # url already visited during a recursive call so ignore the url
         return
     
     if debugStatements:
-        print("Scrapping following url:",url)
+        print("\nScrapping following url:",url)
         
     # mark the url as visited for performing web scrapping operation
     __VISITED_URLS.add(url) 
@@ -65,16 +65,6 @@ def downloadImages(url: str, recursiveDownload=False, debugStatements=False) -> 
     soup = BeautifulSoup(r.content, "html.parser")
     imgs = soup.find_all('img')
     
-    # extracting the basepath for the images and the webpage
-    # used in-case the extracted url has path relative to base_url folder
-    base_url = re.match(r"^(.*/)(.*\.html)?", url).groups()[0]
-    
-    # Ignore base URL because it will be like going back to parent while scrapping resulting in an un-necessary increase in URLs scrapped
-    if base_url[-1] == '/':
-        __VISITED_URLS.add(base_url[:-1])
-    else:
-        __VISITED_URLS.add(base_url)
-    
     if not path.exists('images/'):
         mkdir("images/")
     
@@ -95,16 +85,13 @@ def downloadImages(url: str, recursiveDownload=False, debugStatements=False) -> 
         
         if not imageURL: continue # empty url
         
-        # formulating complete url for the image if it is given with reference to webpage folder on server
-        
-        if imageURL[:4] != 'http': 
-            imageURL = path.join(base_url, imageURL)
-        
-        # if protocol still not specified even after joining the url, then we explicitly specify the protocol
-        # because with protocol specification, the image cannot be retrieved.
-        if imageURL[:4] != 'http': 
-            imageURL = 'https:' + imageURL
+        # Accounting for the case that the image url is actually relative path on the server
+        # netloc (network location) will be None in such case
+        if not urllib.parse.urlparse(imageURL).netloc:
+            imageURL = urllib.parse.urljoin(url, imageURL) # join url to imageURL to get absolute image URL
             
+        if not urllib.parse.urlparse(imageURL).scheme:
+            imageURL = "https:" + imageURL
             
         try:
             image_data = requests.get(imageURL) # getting the image data
@@ -117,35 +104,39 @@ def downloadImages(url: str, recursiveDownload=False, debugStatements=False) -> 
             
             with open("images/" + image_name, 'wb') as imageFile:
                 imageFile.write(image_data.content)
-                
+            
             logger.info(f'Successfuly retrieved image from {imageURL}')
             
         except requests.exceptions.RequestException as e:
             logger.error(f"Error retrieving image from {imageURL}: {e}")
 
-    if recursiveDownload:
-        # recursively scrapping all webpages to download the images present on them
+    if __RECURSE:
+        # performing first level recursion
+        __RECURSE = False # setting recursion flag to false to prevent further recursive calls.
+        
         links = soup.find_all('a')
         
         if debugStatements:
-            print(f"recursing for {len(links)} links")
-        for link in links:
-            link_url = link.get('href')
+            print(f"\nrecursing for {len(links)} links\n")
+            
+        for i in range(len(links)):
+            link_url = links[i].get('href')
+            
             if link_url:
-                if link_url[0:4] != "http":
-                    link_url = path.join(base_url, link_url)
-                if link_url[0:4] != "http":
-                    link_url = "https:" + link_url
-                
-                # passing the recursive parameters recursively
-                # recursiveDownloads is not passed to allow only a single level of recursive download
-                # In case the image anchor tags contain a link to web-page which in turn actually holds the actual image-link.
-                downloadImages(link_url, debugStatements=debugStatements)
+                if debugStatements:
+                    print(f"\n{i}. Recursing for {link_url}")  
+                    
+                if not urllib.parse.urlparse(link_url).netloc:
+                    link_url = urllib.parse.urljoin(url, link_url)
+                    
+                # Scrapping 1 level deep in case the image anchor tags contain a link to web-page 
+                # which in turn actually holds the actual image-link.
+                downloadImages(link_url, debugStatements)
     
 
 def __main__():
     url = "<paste url here>"
-    downloadImages(url, True, True)
+    downloadImages(url, True)
     print(f"total {len(__VISITED_URLS)} urls visited while scrapping {url}.")
     
 
