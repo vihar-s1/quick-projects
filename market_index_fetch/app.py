@@ -22,7 +22,7 @@ def getCurrencyRate(currencies: list[str]):
     return rates
 
 
-def getStockQuote(tickers: list[str]) -> pd.DataFrame:
+def getStockQuote(tickers: str | list[str]) -> pd.DataFrame:
     '''
     Fetches symbol, company mame, day-High,  day-Low, base price, change, 
     percentage change, total Traded Volume, closing price, and last price for the given ticker
@@ -34,26 +34,22 @@ def getStockQuote(tickers: list[str]) -> pd.DataFrame:
     quotes = {}
     
     if type(tickers) is str:
-        quote = nse.get_quote(tickers)
+        tickers = [tickers]
+        
+    for ticker in tickers:
+        # get_index_quote
+        quote = nse.get_quote(ticker)
+        
+        if quote is None:
+            quotes[ticker] = None
+            continue
+        
         req_data = {}
         for key in keys:
             req_data[key] = quote[key]
-        quotes[tickers] = req_data
-    else:
-        for ticker in tickers:
-            # get_index_quote
-            quote = nse.get_quote(ticker)
             
-            if quote is None:
-                quotes[ticker] = None
-                continue
-            
-            req_data = {}
-            for key in keys:
-                req_data[key] = quote[key]
-                
-            quotes[ticker] = req_data
-            
+        quotes[ticker] = req_data
+    
     return pd.DataFrame(quotes)  
 
 
@@ -63,5 +59,5 @@ if __name__ == "__main__":
     except RatesNotAvailableError as e:
         print("RatesNotAvailableError Occured:", e)
     
-    quotes = getStockQuote(['INFY', 'ADANIPOWER'])
+    quotes = getStockQuote(['INFY', 'ADANIPOWER', 'NIFTY 50', 'SENSEX'])
     print(quotes)
