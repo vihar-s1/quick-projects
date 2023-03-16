@@ -16,6 +16,8 @@ __MORSE_CODE_DICT = {
     '-': '-....-', '(': '-.--.', ')': '-.--.-',
 }
 
+__INVERSE_MORSE_CODE = {v: k for (k, v) in __MORSE_CODE_DICT.items()}
+
 
 def encode(message: str | None) -> str:
     '''
@@ -42,6 +44,8 @@ def decode(encoded_string: str | None) -> str:
     '''
     Decodes the given encoded string. Only focuses on valid encoded portions.
     '''
+    if not encoded_string:
+        return ""
 
     # Strips all the extra empty spaces
     # The final blank space is to indicate decoding of the last encoded character of the string
@@ -55,7 +59,7 @@ def decode(encoded_string: str | None) -> str:
 
     for letter in encoded_string:
         # if . or -, then valid encoded character and so track it
-        if letter == '.' or letter == '-':
+        if letter in {'.', '-'}:
             encoding += letter
             i = 0
         # empty space found so decode the character
@@ -64,9 +68,8 @@ def decode(encoded_string: str | None) -> str:
         elif letter == ' ':
             i += 1
             if i == 1:
-                # Accessing key by using value --> from list of values, find index of value=encoding,
-                # and then, using that index, access the corresponding key in the list of keys
-                message += list( __MORSE_CODE_DICT.keys() )[ list(__MORSE_CODE_DICT.values()).index(encoding) ]
+                # Inverting morse code with the inverse dictionary
+                message += __INVERSE_MORSE_CODE[encoding]
                 encoding = ""
             elif i == 2:
                 message += " "

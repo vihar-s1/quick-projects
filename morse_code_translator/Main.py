@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
-import MorseCodec
+import morse_codec
 
-message = input('Enter String: ')
-encoded = MorseCodec.encode(message)
-decoded = MorseCodec.decode(encoded)
-print(f"encoded: {encoded} \ndecoded: {decoded}")
+if __name__ == "__main__":
+    message = input('Enter String: ')
+    encoded = morse_codec.encode(message)
+    decoded = morse_codec.decode(encoded)
+    print(f"encoded: {encoded} \ndecoded: {decoded}")
