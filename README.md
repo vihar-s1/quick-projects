@@ -1,23 +1,23 @@
-# small-projects
+# Side Projects
 
-The repo consists of various kinds of small scale projects spanning a single file to a few files.
+- The repo consists of various kinds of small scale side projects spanning a few files coded with the idea of daily task automation.
+- Each of the projects contain their own README.md files explaining the project in greater detail.
+- A brief summary of all the projects is present in the following file.
 
-## ***List of Projects***
+## ***Table of Content***
 
-- Morse Code Translator
-- Market Index Fetch
-- Bulk Image Download
+- [Morse Code Translator](#morse-code-translator)
+- [Market Index Fetch](#market-index-fetch)
+- [Bulk Image Download](#bulk-image-download)
 
-## ***Project Introduction***
-
-### **Morse Code Translator**
+## **Morse Code Translator**
 
 - Basic morse code encoder and decoder functions
 
-### **Market Index Fetch**
+## **Market Index Fetch**
 
-- Small script which contains two functions, one which returns well-formatted dictionary of strings containing rate of conversions of given currencies to INR. The second function returns the closing prices and the volume for the given share tickers.
+- Script of functions to retrieve a dictionary of conversion rates for a given list of currencies to INR or the get the market prices/closing prices and trade volume for list of shares.
 
-### **Bulk Image Download**
+## **Bulk Image Download**
 
-- Web scrapping script that can download any accessible images/thumbnails present in an html web-page. The script also has option to recursively scrape all the urls present on that web-page to download images present on those webpages as well.
+- Web scrapping script that can download any accessible images/thumbnails present in an html web-page along with an option to perform a single level recursive search.
