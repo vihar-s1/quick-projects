@@ -8,7 +8,7 @@ import java.io.*;
 
 public class QuizCardPlayer {
     private JTextArea display;
-    private JTextArea answer;
+//    private JTextArea answer;
     private ArrayList<QuizCard> cardList; private QuizCard currentCard;
     private int currentCardIndex;
     private JFrame frame;
@@ -79,7 +79,7 @@ public class QuizCardPlayer {
         cardList = new ArrayList<>();
         try {
             BufferedReader reader = new BufferedReader(new FileReader(file));
-            String line = null;
+            String line;
             while ((line = reader.readLine()) != null) {
                 makeCard(line);
             }

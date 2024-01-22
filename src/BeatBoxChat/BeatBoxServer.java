@@ -12,7 +12,7 @@ import java.util.Iterator;
 public class BeatBoxServer {
     private ArrayList<ObjectOutputStream> clientOutputStreams;
     private ArrayList<Thread> clientHandlerThreads;
-    private int PORT = 5244;
+    private final int PORT = 5244;
 
     public static void main(String[] args){
         new BeatBoxServer().go();

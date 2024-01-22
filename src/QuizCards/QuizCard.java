@@ -1,7 +1,7 @@
 package QuizCards;
 
 public class QuizCard {
-    private String question, answer;
+    private final String question, answer;
 
     public QuizCard(String question, String answer){
         this.question = question;

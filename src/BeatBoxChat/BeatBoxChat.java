@@ -10,8 +10,8 @@ import java.net.Socket;
 import java.util.*;
 
 public class BeatBoxChat {
-    private static int PORT = 5244;
-    private static String SERVER = "127.0.0.1";
+    private final static int PORT = 5244;
+    private final static String SERVER = "127.0.0.1";
     private JFrame frame;
     private JPanel mainPanel;
     private ArrayList<JCheckBox> checkBoxes;
@@ -25,12 +25,12 @@ public class BeatBoxChat {
     private JList<String> incomingList;
     private JTextField userMessage;
     private int messagesSent;
-    private Vector<String> listVector = new Vector<>();
+    private final Vector<String> listVector = new Vector<>();
     private String userName;
     private Socket serverSock;
     private ObjectOutputStream outputStream;
     private ObjectInputStream inputStream;
-    private HashMap<String, boolean[]> otherSequencesMap = new HashMap<>();
+    private final HashMap<String, boolean[]> otherSequencesMap = new HashMap<>();
 //    private Sequence mySequence = null;
     /* CHAT RELATED FIELDS END HERE */
 
@@ -46,17 +46,6 @@ public class BeatBoxChat {
     public static void main(String[] args) {
         BeatBoxChat beatBox = new BeatBoxChat();
         beatBox.startUp(args[0]);
-    }
-
-
-    public static int getPORT() {
-        return PORT;
-    }
-
-    public static boolean setPORT(int PORT) {
-        if (1024 > PORT || PORT > 65535) return false;
-        BeatBoxChat.PORT = PORT;
-        return true;
     }
 
     public void startUp(String name) {

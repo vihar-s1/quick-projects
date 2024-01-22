@@ -7,8 +7,8 @@ import java.util.ArrayList;
 
 public class GameHelper {
     private static  final String alphabet = "abcdefghijklmnopqrstuvwxyz";
-    private int gridLength, gridSize;
-    private int[] grid;
+    private final int gridLength, gridSize;
+    private final int[] grid;
     private int warshipsPlaced;
 
     public GameHelper(int gridLength) {
@@ -22,11 +22,10 @@ public class GameHelper {
     public ArrayList<String> placeShip(int shipSize) {
         ArrayList<String> shipCells = new ArrayList<>();
 
-        int[] coords  = new int[shipSize];
-        String temp = null;
+        int[] coordinates  = new int[shipSize];
         int attempts  = 0;
         boolean success = false;
-        int location = 0;
+        int location;
 
         this.warshipsPlaced++;
 
@@ -46,7 +45,7 @@ public class GameHelper {
                     success = false;
                     break;
                 }
-                coords[x++] = location;
+                coordinates[x++] = location;
                 location += increment;
 
                 if (location >= gridSize) // ship goes outside grid
@@ -58,13 +57,13 @@ public class GameHelper {
         }// end attempts while
         if (success){
             // converting grid numbers to alphanumeric co-ordinates of the ship
-            for (int co_ord : coords){
+            for (int co_ord : coordinates){
                 // for each coordinate, get alphanumeric form
                 this.grid[co_ord] = 1; // mark cell as used;
-                int row = (int) (co_ord / this.gridLength);
+                int row = (co_ord / this.gridLength);
                 int col = co_ord % this.gridLength;
 
-                String shipCell = String.valueOf(alphabet.charAt(col)) + Integer.toString(row);
+                String shipCell = alphabet.charAt(col) + Integer.toString(row);
                 shipCells.add(shipCell);
             }
         }

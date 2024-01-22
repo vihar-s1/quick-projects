@@ -2,7 +2,7 @@ package BattleshipCLI;
 
 import java.util.ArrayList;
 
-class BattleshipGame {
+public class BattleshipGame {
 
     private int guessCount = 0;
     private final int gridSize = 7;
