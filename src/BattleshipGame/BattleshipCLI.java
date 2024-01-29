@@ -1,14 +1,29 @@
-package BattleshipCLI;
+package BattleshipGame;
+
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.List;
 
-public class BattleshipGame {
+public class BattleshipCLI {
 
     private int guessCount = 0;
-    private final int gridSize = 7;
-    private final int shipCount = 3;
-    private final GameHelper helper = new GameHelper(gridSize);
+    private final int gridSize;
+    private final int shipCount;
+    private final GameHelper helper;
     private final ArrayList<WarShip> warShipList = new ArrayList<>();
+
+    public static void main(String[] args) {
+        BattleshipCLI game = new BattleshipCLI(7, 3);
+        game.startPlaying();
+    }
+
+    public BattleshipCLI(int gridSize, int shipCount) {
+        this.gridSize = gridSize;
+        this.shipCount = shipCount;
+        this.helper = new GameHelper(gridSize);
+        this.setUpGame(); // default first time setup
+    }
 
     private void leakGame() {
         // prints all the ship names and their locations
@@ -22,11 +37,12 @@ public class BattleshipGame {
     }
 
     public int getGuessCount() { return guessCount; }
-    public int getGridSize() { return gridSize; }
-    public int getShipCount() { return shipCount; }
 
     public void setUpGame() {
         // Create Ships and place them at random locations
+        this.warShipList.clear();
+        this.guessCount = 0;
+        this.helper.reset();
         String[] shipName = {"Carrier5", "Battleship4", "Cruiser3", "Submarine3", "destroyer2"};
 
         for (int i = 0; i < this.shipCount; i++) {
@@ -37,6 +53,7 @@ public class BattleshipGame {
             );
             this.warShipList.add(warShip);
         }
+//        leakGame();
     }
 
     public void startPlaying() {
@@ -57,8 +74,13 @@ public class BattleshipGame {
         finishGame();
     }
 
-    private String checkUserGuess(String guess) {
+    public @NotNull String checkUserGuess(@NotNull String guess) {
+        if (this.warShipList.isEmpty())
+            throw new RuntimeException("Cannot Guess after Game Over");
+
         this.guessCount++;
+//        System.out.println(this.warShipList);
+//        System.out.println(this.helper);
 
         for (WarShip warShip : this.warShipList) {
             String result = warShip.checkYourself(guess);
@@ -71,6 +93,12 @@ public class BattleshipGame {
 
         return "miss";
     }
+
+    public List<String> getTargetNames() {
+        return this.warShipList.stream().map((WarShip::name)).toList();
+    }
+
+    public boolean isGameOver() { return this.warShipList.isEmpty(); }
 
     private void finishGame() {
         System.out.println("All warships have been sunk!!");
