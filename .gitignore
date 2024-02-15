@@ -1,0 +1,11 @@
+# Project Specific Files
+#-----------------------#
+# temporary folder for drive backup
+.tmp.driveupload
+
+# IntelliJ Project Files
+#-----------------------#
+.idea
+*.iml
+out
+gen

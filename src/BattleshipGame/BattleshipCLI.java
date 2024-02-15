@@ -7,7 +7,8 @@ import java.util.List;
 
 public class BattleshipCLI {
 
-    private int guessCount = 0;
+    private int guessCount;
+    private int hitCount;
     private final int gridSize;
     private final int shipCount;
     private final GameHelper helper;
@@ -36,12 +37,14 @@ public class BattleshipCLI {
         }
     }
 
-    public int getGuessCount() { return guessCount; }
+    public int getGuessCount() { return this.guessCount; }
+    public int getHitCount() { return this.hitCount; }
 
     public void setUpGame() {
         // Create Ships and place them at random locations
         this.warShipList.clear();
         this.guessCount = 0;
+        this.hitCount = 0;
         this.helper.reset();
         String[] shipName = {"Carrier5", "Battleship4", "Cruiser3", "Submarine3", "destroyer2"};
 
@@ -86,11 +89,13 @@ public class BattleshipCLI {
             String result = warShip.checkYourself(guess);
             if (result.equals("kill")) {
                 this.warShipList.remove(warShip);
+                this.hitCount++;
                 return "killed " + warShip.name();
-            } else if (result.equals("hit"))
+            } else if (result.equals("hit")){
+                this.hitCount++;
                 return "hit " + warShip.name();
+            }
         }
-
         return "miss";
     }
 
@@ -103,5 +108,6 @@ public class BattleshipCLI {
     private void finishGame() {
         System.out.println("All warships have been sunk!!");
         System.out.println("It took you " + this.guessCount + " guesses.");
+        System.out.printf("Hit Rate: %.3f", this.hitCount / (double) this.guessCount);
     }
 }

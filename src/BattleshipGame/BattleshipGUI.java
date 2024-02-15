@@ -22,7 +22,7 @@ public class BattleshipGUI {
     private JList<String> guessResponsesArea;
 
     public static void main(String[] args) {
-        new BattleshipGUI(7, 3).go();
+        new BattleshipGUI(7, 4).go();
     }
 
     public BattleshipGUI(int gridSize, int shipCount) {
@@ -42,7 +42,7 @@ public class BattleshipGUI {
     }
 
     public void go() {
-        this.frame.setBounds(100,100 ,450, 450);
+        this.frame.setBounds(100,100 ,500, 500);
 //        this.frame.pack();
         this.frame.setVisible(true);
     }
@@ -141,24 +141,24 @@ public class BattleshipGUI {
 
 
         /* CREATING MENU BAR */
-        JMenuBar menuBar = new JMenuBar();
-        JMenu fileMenu = new JMenu("File");
-        menuBar.add(fileMenu);
-
-        JMenuItem changeGridSize = new JMenuItem("Grid Size");
-        changeGridSize.addActionListener(new GridSizeListener());
-        fileMenu.add(changeGridSize);
-        fileMenu.addSeparator();
-        JMenuItem changeShipCount = new JMenuItem("Ship Count");
-        fileMenu.add(changeShipCount);
-
-        this.frame.setJMenuBar(menuBar);
+//        JMenuBar menuBar = new JMenuBar();
+//        JMenu fileMenu = new JMenu("File");
+//        menuBar.add(fileMenu);
+//
+//        JMenuItem changeGridSize = new JMenuItem("Grid Size");
+//        changeGridSize.addActionListener(new GridSizeListener());
+//        fileMenu.add(changeGridSize);
+//        fileMenu.addSeparator();
+//        JMenuItem changeShipCount = new JMenuItem("Ship Count");
+//        fileMenu.add(changeShipCount);
+//
+//        this.frame.setJMenuBar(menuBar);
         /* END CREATING MENU BAR */
 
     } // end setUpGUI()
 
     private void gameOver() {
-        // set all not clicked buttons to "-".
+        // set all not clicked buttons to "-". --> Guaranteed to be empty since all ships are discovered
         // disable all buttons
 
         for (Component component : gameBoardButtons.getComponents()){
@@ -171,6 +171,8 @@ public class BattleshipGUI {
         }
         // show win game message / popup?
         guessResponsesVector.addFirst("You killed all warships in " + game.getGuessCount() + " guesses!!");
+        double hitRate = this.game.getHitCount() / (double) this.game.getGuessCount();
+        guessResponsesVector.addFirst("Hit Rate: %.3f".formatted(hitRate*100));
         guessResponsesArea.setListData(guessResponsesVector);
     } // end gameOver()
 
@@ -206,11 +208,4 @@ public class BattleshipGUI {
             guessResponsesArea.setListData(guessResponsesVector);
         }
     } // end BoardCellListener class
-
-    public class GridSizeListener implements ActionListener{
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            System.out.println("Pending");
-        }
-    } // end GridSizeListener class
 }
