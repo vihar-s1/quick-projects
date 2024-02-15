@@ -20,6 +20,10 @@ public class BeatBox {
 
     private final int beatCount = 16;
 
+    public static void main(String[] args) {
+        new  BeatBox().runGUI();
+    }
+
     String[] instrumentLabels = {
       "Bass Drum", "Closed Hi-Hat", "Open Hi-Hat", "Acoustic Snare",
       "Crash Cymbal", "Hand Clap", "High Tom", "Hi Bongo",
