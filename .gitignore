@@ -1,18 +1,36 @@
 # ignoring the virtual environment
 virtualEnv
 
-####################################################
-## BULK-IMAGE-DOWNLOAD script files to be ignored ##
-####################################################
+
+# BULK-IMAGE-DOWNLOAD script files to be ignored
+#-----------------------------------------------#
 
 # avoid uploading the downloaded imags
 bulk-image-download/images/
 # avoid uploading any log files
 bulk-image-download/*.log
 
-###################################################
-## MARKET_INDEX_FETCH script files to be ignored ##
-###################################################
+
+# MARKET_INDEX_FETCH script files to be ignored 
+#----------------------------------------------#
 
 # ignoring the csv files generated
 market_index_fetch/*.csv
+
+
+#-------------------------------------------------#
+#-------- MiniProjects .gitignore content --------#
+#-------------------------------------------------#
+
+
+# Project Specific Files
+#-----------------------#
+# temporary folder for drive backup
+.tmp.driveupload
+
+# IntelliJ Project Files
+#-----------------------#
+.idea
+*.iml
+out
+gen
